@@ -11,7 +11,7 @@ public class Chromosome : MonoBehaviour
 
     [Header("Fitness")]
     public float m_LifeTime;
-    private bool m_Alive;
+    public bool m_Alive;
 
     public void Initialize()
     {
@@ -29,8 +29,15 @@ public class Chromosome : MonoBehaviour
         m_LifeTime = 0.0f;
         m_Alive = true;
         gameObject.SetActive(true);
+        SetColor();
     }
 
+    private void SetColor()
+    {
+        var color = new Color(m_Red, m_Green, m_Blue, 1.0f);
+        var renderer = GetComponent<Renderer>();
+        renderer.material.SetColor("_Color", color);
+    }
 
     public void Kill()
     {

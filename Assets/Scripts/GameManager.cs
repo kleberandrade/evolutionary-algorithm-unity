@@ -6,9 +6,32 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     public static float SimulationTime;
+
+    [Header("Object")]
     public GameObject m_Chameleon;
+
+    [Header("EA")]
     public int m_PopulationSize = 10;
-    public List<Chromosome> m_Population = new List<Chromosome>();
+    public int m_TournamentSize = 2;
+    public float m_MutationRate = 0.02f;
+    public float m_MaxGenerationTime = 15.0f;
+
+    private int m_Generation = 0;
+    private List<Chromosome> m_Population = new List<Chromosome>();
+
+    public bool Alive => m_Population.Count((chromosome) => chromosome.m_Alive) > 0;
+    public bool NotAlive => !Alive;
+    public bool OverTime => SimulationTime >= m_MaxGenerationTime;
+
+    private void Update()
+    {
+        SimulationTime += Time.deltaTime;
+        if (OverTime || NotAlive)
+        {
+            m_Population.ForEach((chromosome) => chromosome.Kill());
+            NextGeneration();
+        }
+    }
 
     private void Start()
     {
@@ -21,8 +44,10 @@ public class GameManager : MonoBehaviour
         {
             var chameleon = Instantiate(m_Chameleon);
             chameleon.transform.position = GetRandomPosition();
+
             var chromosome = chameleon.GetComponent<Chromosome>();
             chromosome.Initialize();
+
             m_Population.Add(chromosome);
         }
     }
@@ -34,8 +59,6 @@ public class GameManager : MonoBehaviour
         position.y = Random.Range(-5.0f, 5.0f);
         return position;
     }
-
-    public int m_TournamentSize = 2;
 
     public Chromosome Selection()
     {
@@ -56,8 +79,6 @@ public class GameManager : MonoBehaviour
         float blue = (parent1.m_Blue + parent2.m_Blue) * 0.5f;
         offspring.Initialize(red, green, blue);
     }
-
-    public float m_MutationRate = 0.02f;
 
     public void Mutation(Chromosome offspring)
     {
@@ -88,5 +109,7 @@ public class GameManager : MonoBehaviour
             Destroy(m_Population[i].gameObject);
 
         m_Population = newPopulation;
+        m_Generation++;
+        SimulationTime = 0.0f;
     }
 }
