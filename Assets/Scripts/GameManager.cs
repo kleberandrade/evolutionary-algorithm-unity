@@ -86,10 +86,33 @@ public class GameManager : MonoBehaviour
         offspring.Initialize();
     }
 
+    public float m_ElitismRate = 0.1f;
+
+    public List<Chromosome> Elitism()
+    {
+        var amount = (int)(m_PopulationSize * m_ElitismRate);
+        var population = m_Population.OrderByDescending(x => x.m_LifeTime).ToList();
+        var list = new List<Chromosome>();
+
+        for (int i = 0; i < amount; i++)
+        {
+            var chameleon = Instantiate(m_Chameleon);
+            chameleon.transform.position = GetRandomPosition();
+
+            var chromosome = chameleon.GetComponent<Chromosome>();
+            var red = population[i].m_Red;
+            var green = population[i].m_Green;
+            var blue = population[i].m_Blue;
+            chromosome.Initialize(red, green, blue);
+
+            list.Add(chromosome);
+        }
+        return list;
+    }
+
     public void NextGeneration()
     {
-        var newPopulation = new List<Chromosome>();
-
+        var newPopulation = Elitism();
         while (newPopulation.Count < m_PopulationSize)
         {
             var parent1 = Selection();
